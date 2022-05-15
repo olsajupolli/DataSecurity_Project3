@@ -215,3 +215,86 @@ string DES() {
 	34,2,42,10,50,18,58,26,
 	33,1,41,9,49,17,57,25
 	};
+	
+
+	string perm = "";
+	for (int i = 0; i < 64; i++) {
+		perm += pt[initial_permutation[i] - 1];
+	}
+	string left = perm.substr(0, 32);
+	string right = perm.substr(32, 32);
+	for (int i = 0; i < 16; i++) {
+		string right_expanded = "";
+
+		for (int i = 0; i < 48; i++) {
+			right_expanded += right[expansion_table[i] - 1];
+		};
+		string xored = Xor(round_keys[i], right_expanded);
+		string res = "";
+
+		for (int i = 0; i < 8; i++) {
+
+			string row1 = xored.substr(i * 6, 1) + xored.substr(i * 6 + 5, 1);
+			int row = convertBinaryToDecimal(row1);
+			string col1 = xored.substr(i * 6 + 1, 1) + xored.substr(i * 6 + 2, 1) + xored.substr(i * 6 + 3, 1) + xored.substr(i * 6 + 4, 1);;
+			int col = convertBinaryToDecimal(col1);
+			int val = Sboxes[i][row][col];
+			res += convertDecimalToBinary(val);
+
+		}
+
+		string perm2 = "";
+		for (int i = 0; i < 32; i++) {
+			perm2 += res[permutation_tab[i] - 1];
+		}
+
+		xored = Xor(perm2, left);
+
+		left = xored;
+		if (i < 15) {
+			string temp = right;
+			right = xored;
+			left = temp;
+		}
+	}
+	string combined_text = left + right;
+	string ciphertext = "";
+	for (int i = 0; i < 64; i++) {
+		ciphertext += combined_text[inverse_permutation[i] - 1];
+	}
+	return ciphertext;
+}
+
+int main() {
+
+	string key, convertedKey;
+	cout << "Shkruani qelesin: ";
+	cin >> key;
+	convertedKey = TextToBinaryString(key);
+	cout << "Qelesi i konvertuar ne binar: " << convertedKey << endl;
+	pt = "01110011 01101001 01100111 01110101 01110010 01101001 00110010 00110010";
+	string apt = pt;
+	cout << "\n16 roundet e gjenerimit te qelesit: " << endl;
+	generate_keys(convertedKey);
+	cout << endl << "Plain text: " << pt << endl;
+	string ct = DES();
+	cout << endl << "Ciphertext: " << ct << endl;
+
+	/*
+	int i = 15;
+	int j = 0;
+	while (i > j)
+	{
+		string temp = round_keys[i];
+		round_keys[i] = round_keys[j];
+		round_keys[j] = temp;
+		i--;
+		j++;
+	}
+	pt = ct;
+	string decrypted = DES();
+	cout << "Decrypted text:" << decrypted << endl;
+	if (decrypted == apt) {
+		cout << "Plain text encrypted and decrypted successfully." << endl;
+	}*/
+}
